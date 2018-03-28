@@ -126,7 +126,7 @@ class AdminUserRepositoryEloquent extends BaseRepository implements AdminUserRep
             $res_role = DB::table('role_admin')->where('user_id', $id)->delete();
             flash('操作成功!', 'success');
         } else {
-            flash('操作成功!', 'error');
+            flash('删除失败!', 'error');
         }
     }
 

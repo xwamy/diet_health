@@ -71,11 +71,12 @@ class UserRepositoryEloquent extends BaseRepository implements UserRepositoryInt
     }
 
     public function deleteUser($id){
+        return false;
         $res = $this->delete($id);
         if ($res) {
             flash('操作成功!', 'success');
         } else {
-            flash('操作成功!', 'error');
+            flash('删除失败!', 'error');
         }
     }
 

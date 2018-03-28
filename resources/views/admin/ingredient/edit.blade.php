@@ -3,6 +3,7 @@
 @section('admin-css')
     <link href="{{ asset('asset_admin/assets/plugins/parsley/src/parsley.css') }}" rel="stylesheet" />
     <link href="{{ asset('asset_admin/assets/plugins/bootstrap-select/bootstrap-select.min.css') }}" rel="stylesheet" />
+    <link href="{{ asset('asset_admin/assets/plugins/switchery/switchery.min.css') }}" rel="stylesheet" />
 @endsection
 
 @section('admin-content')
@@ -58,6 +59,42 @@
                                     <input class="form-control" type="text" name="sort" placeholder="排序" data-parsley-required="true" data-parsley-type="integer" data-parsley-required-message="请输入排序"  value="{{ $data['sort'] }}" />
                                 </div>
                             </div>
+
+                            <div class="form-group">
+                                <label class="control-label col-md-4 col-sm-4" for="role">营养类型 * :</label>
+                                <div class="col-md-6 col-sm-6">
+                                    <select class="form-control selectpicker"
+                                            data-live-search="true"
+                                            data-style="btn-white"
+                                            data-parsley-required="true"
+                                            data-parsley-errors-container="#role_error"
+                                            data-parsley-required-message="营养类型"
+                                            name="nutritive_type">
+                                        <option value="">-- 请选择 --</option>
+                                        @foreach($nutritive_type as $key=>$value)
+                                            <option value="{{ $value['id'] }}" @if($value['id'] == $data['nutritive_type']) selected="selected" @endif>{{ $value['display_name'] }}</option>
+                                        @endforeach
+                                    </select>
+                                    <p id="role_error"></p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label col-md-4 col-sm-4" for="description">营养名称 * :</label>
+                                <div class="col-md-6 col-sm-6">
+                                    <p>
+                                        <a href="javascript:checkAll();" class="btn btn-sm btn-primary m-r-5"><i class="fa fa-check"></i> 全选</a>
+                                        <a href="javascript:checkReverse();" class="btn btn-sm btn-inverse m-r-5"><i class="fa fa-magic"></i> 反选</a>
+                                    </p>
+                                    <hr>
+                                    <div class="col-md-10 col-sm-10" id="nutritive_lists">
+                                        @foreach($nutritive_lists as $key=>$value)
+                                            <div class="col-md-3 col-sm-3">
+                                                <input type="checkbox" name="nutritive[]" data-render="switchery" data-theme="purple" @if(in_array($value->id,$rel_lists)) checked="checked" @endif value="{{ $value->id }}"/> {{ $value->name }}
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
                             <div class="form-group">
                                 <label class="control-label col-md-4 col-sm-4"></label>
                                 <div class="col-md-6 col-sm-6">
@@ -78,7 +115,69 @@
 @section('admin-js')
     <script src="{{ asset('asset_admin/assets/plugins/parsley/dist/parsley.js') }}"></script>
     <script src="{{ asset('asset_admin/assets/plugins/bootstrap-select/bootstrap-select.min.js') }}"></script>
+    <script src="{{ asset('asset_admin/assets/plugins/switchery/switchery.min.js') }}"></script>
     <script>
         $('.selectpicker').selectpicker('render');
+
+        $(document).ready(function() {
+            renderSwitcher();
+        });
+
+        $("select[name='nutritive_type']").change(function () {
+            $.ajax({
+                url:'{{ url('admin/nutritive/ajaxIndex') }}',
+                type:'GET', //GET
+                data:{'_token':'{{csrf_token()}}',type:$("select[name='nutritive_type']").val()},
+                dataType:'json',
+                success:function(data){
+                    var nutritive_lists = data.data;
+                    var html ="";
+                    $.each(nutritive_lists, function(key, val) {
+                        html +='<input type="checkbox" name="nutritive[]" data-render="switchery" data-theme="purple" value="'+val.id+'"/> '+val.name;
+                    });
+                    $("#nutritive_lists").html(html);
+                    renderSwitcher();
+                }
+            });
+        });
+
+        function renderSwitcher(){
+            if ($('[data-render=switchery]').length !== 0) {
+                $('[data-render=switchery]').each(function() {
+                    var themeColor = '#00acac';
+                    if ($(this).attr('data-theme')) {
+                        switch ($(this).attr('data-theme')) {
+                            case 'red': themeColor = '#ff5b57'; break;
+                            case 'blue': themeColor = '#348fe2'; break;
+                            case 'purple': themeColor = '#727cb6'; break;
+                            case 'orange': themeColor = '#f59c1a'; break;
+                            case 'black': themeColor = '#2d353c'; break;
+                        }
+                    }
+                    var option = {};
+                    option.color = themeColor;
+                    option.secondaryColor = ($(this).attr('data-secondary-color')) ? $(this).attr('data-secondary-color') : '#dfdfdf';
+                    option.className = ($(this).attr('data-classname')) ? $(this).attr('data-classname') : 'switchery';
+                    option.disabled = ($(this).attr('data-disabled')) ? true : false;
+                    option.disabledOpacity = ($(this).attr('data-disabled-opacity')) ? parseFloat($(this).attr('data-disabled-opacity')) : 0.5;
+                    option.speed = ($(this).attr('data-speed')) ? $(this).attr('data-speed') : '0.3s';
+                    var switchery = new Switchery(this, option);
+                });
+            }
+        }
+
+        //全选
+        function checkAll(){
+            $("input[type=checkbox]").each(function() {
+                if(!this.checked) this.click();
+            });
+        }
+
+        //反选
+        function checkReverse() {
+            $("input[type=checkbox]").each(function() {
+                this.click();
+            });
+        }
     </script>
 @endsection

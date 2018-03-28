@@ -82,4 +82,5 @@ class NutritiveController extends Controller
         $result = $this->Nutritive->ajaxIndex($request);
         return response()->json($result,JSON_UNESCAPED_UNICODE);
     }
+
 }

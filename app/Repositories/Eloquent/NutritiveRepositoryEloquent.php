@@ -54,11 +54,18 @@ class NutritiveRepositoryEloquent extends BaseRepository
                 $this->model = $this->model->where('name', $search['value']);
             }
         }
+        $type = $request->input('type', '');
+        if ($type) {
+           $this->model = $this->model->where('type', $type);
+        }
         $count = $this->model->count();
-        $this->model = $this->model->orderBy($order['name'], $order['dir']);
-        $this->model = $this->model->offset($start)->limit($length)->get();
-
-
+        if(!empty($order['name']) && !empty( $order['dir'])){
+            $this->model = $this->model->orderBy($order['name'], $order['dir']);
+        }
+        if(!empty($start) && !empty( $length)) {
+            $this->model = $this->model->offset($start)->limit($length);
+        }
+        $this->model  = $this->model->get();
         if ($this->model) {
             foreach ($this->model as $item) {
                 $item->button = $item->getActionButtons('nutritive');
@@ -119,11 +126,15 @@ class NutritiveRepositoryEloquent extends BaseRepository
     }
 
     public function deleteNutritive($id){
+        $data = DB::table('ingredients_nutritive_rel')->where('nutritive_id', $id)->first();
+        if(!empty($data)){
+            abort(500, '该营养价值与食材有关联关系，不允许删除！');
+        }
         $res = $this->delete($id);
         if ($res) {
             flash('操作成功!', 'success');
         } else {
-            flash('操作成功!', 'error');
+            flash('删除失败!', 'error');
         }
     }
 

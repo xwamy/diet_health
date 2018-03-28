@@ -112,11 +112,15 @@ class CookingWayRepositoryEloquent extends BaseRepository implements CookingWayR
     }
 
     public function deleteCookingway($id){
+        $data = DB::table('cookbook')->where('cooking_way_id', $id)->first();
+        if(!empty($data)){
+            abort(500, '该烹饪方式与食谱有关联关系，不允许删除！');
+        }
         $res = $this->delete($id);
         if ($res) {
             flash('操作成功!', 'success');
         } else {
-            flash('操作成功!', 'error');
+            flash('删除失败!', 'error');
         }
     }
 

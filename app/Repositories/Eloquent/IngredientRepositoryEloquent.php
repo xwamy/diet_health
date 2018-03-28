@@ -67,7 +67,25 @@ class IngredientRepositoryEloquent extends BaseRepository
 
     public function editViewData($id)
     {
-        $data = $this->find($id, ['id', 'name', 'sort'])->toArray();
+        $data = $this->find($id, ['id', 'name', 'sort','nutritive_type'])->toArray();
+        if ($data) {
+            return $data;
+        }
+        abort(404);
+    }
+    //根据类型获取营养价值
+    public function getNutritiveByType($type)
+    {
+        $data = DB::table('nutritive')->where('type', $type)->get();
+        if ($data) {
+            return $data;
+        }
+        abort(404);
+    }
+    //根据ID获取跟营养价值的关系
+    public function getNutritiveRelById($ingredients_id)
+    {
+        $data = DB::table('ingredients_nutritive_rel')->where('ingredients_id', $ingredients_id)->get();
         if ($data) {
             return $data;
         }
@@ -85,8 +103,21 @@ class IngredientRepositoryEloquent extends BaseRepository
         $cooking_ways = new Ingredient();
         $cooking_ways->name = $attr['name'];
         $cooking_ways->sort = $attr['sort'];
+        $cooking_ways->nutritive_type = $attr['nutritive_type'];
         $cooking_ways->cTime = date("Y-m-d H:i:s");
         $cooking_ways->save();
+
+        //新增食材与营养价值的关系
+        foreach($attr['nutritive'] as $v){
+            $ingredients_nutritive_rel[] =
+            [
+                'ingredients_id'=>$cooking_ways->id,
+                'nutritive_id'=>$v,
+            ];
+        }
+
+        DB::table('ingredients_nutritive_rel')->insert($ingredients_nutritive_rel);
+
         flash('食材新增成功', 'success');
     }
     /*
@@ -102,6 +133,30 @@ class IngredientRepositoryEloquent extends BaseRepository
         $res = $this->update($attr, $id);
 
         if ($res) {
+            $rel_datas = DB::table('ingredients_nutritive_rel')->where('ingredients_id', $id)->get();
+
+            foreach($attr['nutritive'] as $v){
+                $rel_data = DB::table('ingredients_nutritive_rel')->where(['nutritive_id'=>$v,'ingredients_id'=>$id])->first();
+                if(!empty($rel_data)){
+                    // 循环删除库中的匹配到的数据
+                    foreach($rel_datas as $k=>$c){
+                        if($c->id == $rel_data->id){
+                            unset($rel_datas[$k]);
+                        }
+                    }
+                    continue;
+                }
+                //库里不存在就添加
+                $ingredients_nutritive_rel[] = ['nutritive_id'=>$v,'ingredients_id'=>$id];
+            }
+            if(!empty($ingredients_nutritive_rel)){
+                DB::table('ingredients_nutritive_rel')->insert($ingredients_nutritive_rel);
+            }
+            //循环删除库中多余的数据
+            foreach($rel_datas as $v){
+                DB::table('ingredients_nutritive_rel')->where('id',$v->id)->delete();
+            }
+
             flash('修改成功!', 'success');
         } else {
             flash('修改失败!', 'error');
@@ -110,11 +165,20 @@ class IngredientRepositoryEloquent extends BaseRepository
     }
 
     public function deleteIngredient($id){
+        $data = DB::table('ingredients_nutritive_rel')->where('ingredients_id', $id)->first();
+        if(!empty($data)){
+            abort(500, '该食材与营养价值有关联关系，不允许删除！');
+        }else{
+            $data = DB::table('ingredients_cookbook_rel')->where('ingredients_id', $id)->first();
+            if(!empty($data)){
+                abort(500, '该食材与食谱有关联关系，不允许删除！');
+            }
+        }
         $res = $this->delete($id);
         if ($res) {
             flash('操作成功!', 'success');
         } else {
-            flash('操作成功!', 'error');
+            flash('删除失败!', 'error');
         }
     }
 

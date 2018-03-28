@@ -16,7 +16,7 @@ class Ingredient extends Model
      */
     protected $table = 'ingredient';
     protected $fillable = [
-        'name','sort','cTime'
+        'name','sort','nutritive_type','cTime'
     ];
 
     /**

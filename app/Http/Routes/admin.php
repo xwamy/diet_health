@@ -36,6 +36,9 @@ Route::group(['middleware' => ['auth:admin']], function ($router) {
     $router->get('nutritive/ajaxIndex',['uses'=>'NutritiveController@ajaxIndex','as'=>'admin.nutritive.ajaxIndex']);
     $router->resource('nutritive', 'NutritiveController');
 
+    //菜品口味管理
+    $router->get('taste/ajaxIndex',['uses'=>'TasteController@ajaxIndex','as'=>'admin.taste.ajaxIndex']);
+    $router->resource('taste', 'TasteController');
 });
 
 Route::get('login', ['uses' => 'AuthController@index','as' => 'admin.auth.index']);

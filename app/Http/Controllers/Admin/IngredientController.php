@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Repositories\Eloquent\RoleRepositoryEloquent;
+use App\Repositories\Eloquent\NutritiveRepositoryEloquent;
 use Illuminate\Http\Request;
 use App\Http\Requests\IngredientRequest;
 use App\Http\Controllers\Controller;
@@ -12,6 +13,12 @@ class IngredientController extends Controller
 {
     public $Ingredient;
     public $role;
+    public $nutritive_type = [
+        '1'=>['id'=>'1','display_name'=>'内补'],
+        '2'=>['id'=>'2','display_name'=>'外补'],
+        '3'=>['id'=>'3','display_name'=>'维生素'],
+        '4'=>['id'=>'4','display_name'=>'微量元素'],
+    ];
     public function __construct(IngredientRepository $IngredientRepository,RoleRepositoryEloquent $roleRepository)
     {
         $this->middleware('CheckPermission:ingredient');
@@ -32,7 +39,7 @@ class IngredientController extends Controller
      */
     public function create()
     {
-        return view('admin.ingredient.create');
+        return view('admin.ingredient.create',['nutritive_type'=>$this->nutritive_type]);
     }
     /*
      * 新增入库
@@ -49,8 +56,13 @@ class IngredientController extends Controller
     public function edit($id)
     {
         $data= $this->Ingredient->editViewData($id);
-
-        return view('admin.ingredient.edit',compact('data'));
+        $nutritive_lists= $this->Ingredient->getNutritiveByType($data['nutritive_type']); //获取选择类型下的所有营养价值
+        $rel_original= $this->Ingredient->getNutritiveRelById($data['id']);  //获取关联的营养价值信息
+        $rel_lists = [];
+        foreach($rel_original as $v){
+            $rel_lists[] = $v->nutritive_id;
+        }
+        return view('admin.ingredient.edit',['nutritive_type'=>$this->nutritive_type,'data'=>$data,'nutritive_lists'=>$nutritive_lists,'rel_lists'=>$rel_lists]);
     }
     /*
      * 编辑入库

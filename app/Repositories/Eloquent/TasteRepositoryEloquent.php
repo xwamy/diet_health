@@ -37,28 +37,24 @@ class TasteRepositoryEloquent extends BaseRepository
         $draw = $request->input('draw', 1);
         $start = $request->input('start', 0);
         $length = $request->input('length', 10);
-        $order['name'] = "users.".$request->input('columns.' . $request->input('order.0.column') . '.name');
+        $order['name'] = $request->input('columns.' . $request->input('order.0.column') . '.name');
         $order['dir'] = $request->input('order.0.dir', 'asc');
         $search['value'] = $request->input('search.value', '');
         $search['regex'] = $request->input('search.regex', false);
         if ($search['value']) {
             if ($search['regex'] == 'true') {//传过来的是字符串不能用bool值比较
-                $this->model = $this->model->where('users.tel', 'like', "%{$search['value']}%")->orWhere('users.name', 'like', "%{$search['value']}%");
+                $this->model = $this->model->where('name', 'like', "%{$search['value']}%");
             } else {
-                $this->model = $this->model->where('users.tel', $search['value'])->orWhere('users.name', $search['value']);
+                $this->model = $this->model->where('name', $search['value']);
             }
         }
         $count = $this->model->count();
-        $this->model = $this->model
-            ->leftJoin('provinces as p', 'users.province', '=', 'p.provinceid')
-            ->leftJoin('city as c', 'users.city', '=', 'c.cityid')
-            ->leftJoin('areas as a', 'users.area', '=', 'a.areaid')
-            ->orderBy($order['name'], $order['dir']);
+        $this->model = $this->model->orderBy($order['name'], $order['dir']);
         $this->model = $this->model->offset($start)->limit($length)->get();
 
         if ($this->model) {
             foreach ($this->model as $item) {
-                $item->button = $item->getActionButtonsOnlyDel('users');
+                $item->button = $item->getActionButtons('taste');
             }
         }
         return [
@@ -69,12 +65,65 @@ class TasteRepositoryEloquent extends BaseRepository
         ];
     }
 
-    public function deleteUser($id){
+    public function editViewData($id)
+    {
+        $data = $this->find($id, ['id', 'name', 'sort'])->toArray();
+        if ($data) {
+            return $data;
+        }
+        abort(404);
+    }
+    /*
+     * 新增
+     */
+    public function create(array $attr)
+    {
+        $data = DB::table('taste')->where('name', $attr['name'])->first();
+        if (!empty($data)) {
+            abort(500, '口味已存在！');
+        }
+        $cooking_ways = new Taste();
+        $cooking_ways->name = $attr['name'];
+        $cooking_ways->sort = $attr['sort'];
+        $cooking_ways->cTime = date("Y-m-d H:i:s");
+        $cooking_ways->save();
+        flash('口味新增成功', 'success');
+    }
+    /*
+     * 修改
+     */
+    public function updateTaste(array $attr, $id)
+    {
+        $data = DB::table('taste')->where('name', $attr['name'])->first();
+
+        if (!empty($data) && $data->id!=$id) {
+            abort(500, '口味已存在！');
+        }
+        $res = $this->update($attr, $id);
+
+        if ($res) {
+            flash('修改成功!', 'success');
+        } else {
+            flash('修改失败!', 'error');
+        }
+        return $res;
+    }
+
+    public function deleteTaste($id){
+        $data = DB::table('cookbook')->where('taste_id', $id)->first();
+        if(!empty($data)){
+            abort(500, '口味和食谱有关联关系，不允许删除！');
+        }else{
+            $data = DB::table('user_taste_rel')->where('taste_id', $id)->first();
+            if(!empty($data)){
+                abort(500, '口味和用户有关联关系，不允许删除！');
+            }
+        }
         $res = $this->delete($id);
         if ($res) {
             flash('操作成功!', 'success');
         } else {
-            flash('操作成功!', 'error');
+            flash('删除失败!', 'error');
         }
     }
 
