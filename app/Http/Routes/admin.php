@@ -39,6 +39,10 @@ Route::group(['middleware' => ['auth:admin']], function ($router) {
     //菜品口味管理
     $router->get('taste/ajaxIndex',['uses'=>'TasteController@ajaxIndex','as'=>'admin.taste.ajaxIndex']);
     $router->resource('taste', 'TasteController');
+
+    //菜谱教程管理
+    $router->get('cookbook/ajaxIndex',['uses'=>'CookbookController@ajaxIndex','as'=>'admin.cookbook.ajaxIndex']);
+    $router->resource('cookbook', 'CookbookController');
 });
 
 Route::get('login', ['uses' => 'AuthController@index','as' => 'admin.auth.index']);

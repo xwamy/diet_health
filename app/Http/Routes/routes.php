@@ -31,7 +31,14 @@ Route::group(['middleware' => ['web']], function () {
         require app_path('Http/Routes/user.php');
     });
 
+    //后台
     Route::group(['prefix' => 'admin', 'namespace' => 'Admin'], function () {
         require app_path('Http/Routes/admin.php');
     });
+
+    //上传
+    Route::group(['prefix' => 'upload', 'namespace' => 'Upload'], function () {
+        require app_path('Http/Routes/upload.php');
+    });
+
 });

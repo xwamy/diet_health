@@ -42,10 +42,15 @@ return [
     */
 
     'disks' => [
-
         'local' => [
             'driver' => 'local',
             'root'   => storage_path('app'),
+        ],
+        'upload' => [
+            'driver' => 'local',
+            'root' => storage_path('/'),
+            'url' => env('APP_URL').'/storage',
+            'visibility' => 'public',
         ],
 
         'ftp' => [

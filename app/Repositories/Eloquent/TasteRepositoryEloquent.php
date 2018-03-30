@@ -49,8 +49,13 @@ class TasteRepositoryEloquent extends BaseRepository
             }
         }
         $count = $this->model->count();
-        $this->model = $this->model->orderBy($order['name'], $order['dir']);
-        $this->model = $this->model->offset($start)->limit($length)->get();
+        if(!empty($order['name']) && !empty( $order['dir'])){
+            $this->model = $this->model->orderBy($order['name'], $order['dir']);
+        }
+        if(!empty($start) && !empty( $length)) {
+            $this->model = $this->model->offset($start)->limit($length);
+        }
+        $this->model  = $this->model->get();
 
         if ($this->model) {
             foreach ($this->model as $item) {
