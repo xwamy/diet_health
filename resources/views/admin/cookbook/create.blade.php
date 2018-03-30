@@ -68,7 +68,7 @@
                                 <label class="control-label col-md-4 col-sm-4" for="name">缩略图 * :</label>
                                 <div class="col-md-6 col-sm-6">
                                     <div class="">
-                                        <input id="uploadImg" type="file" name="thumb" data-url="{{url('upload/uploadfile/jqueryfile')}}?_token={{csrf_token()}}" multiple style="display: none" />
+                                        <input id="uploadImg" type="file" name="thumb_upload" data-url="{{url('upload/uploadfile/jqueryfile')}}?_token={{csrf_token()}}" multiple style="display: none" />
                                         <div id="chooseFile">选择文件</div>
                                         <div id="uploadFile">开始上传</div>
                                         <div id="rechooseFile">重新选择</div>
@@ -80,6 +80,7 @@
                                     <div id="progress">
                                         <div class="bar" style="width: 0%;"></div>
                                     </div>
+                                    <input id="uploadImg_path" type="hidden" name="thumb" value="" />
                                 </div>
                             </div>
                             <div class="form-group">
@@ -296,16 +297,21 @@
                 })
                 //上传请求失败时触发的回调函数
                 .on("fileuploadfail", function(e, data) {
-                    console.log(11+data);
+                    if (data.errorThrown=='abort') {
+                        NUI.showMsg('上传取消！', 'success',3);
+                    }else{
+                        NUI.showMsg('上传失败，请稍后重试！', 'error',3);
+                    }
                 })
                 //上传请求成功时触发的回调函数
-                .on("fileuploaddone", function(e, data) {
-                    console.log(22+data);
-                    $("#uploadImg").val(data.file_path);
+                .on("fileuploaddone", function(e,data) {
+                    //上传成功并将地址写入到input框
+                    alert(data.result.message);
+                    $("#uploadImg_path").val(data.result.file_path);
                 })
                 //上传请求结束后，不管成功，错误或者中止都会被触发
                 .on("fileuploadalways", function(e, data) {
-                    console.log(33+data);
+                    console.log(data);
                 })
             //手动验证
             function validate(file) {
