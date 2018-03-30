@@ -1,2 +1,23 @@
 1. 部署项目目录指定到public 目录下
 2. 同时创建新的资源服务器 目录指定到storage 下； 修改UploadController 里面的 $file_servers 地址
+
+
+
+
+
+
+
+
+
+
+URL访问地址:
+https://dms-net.aliyun.com/logout.do?token=f0a3c73d-e47e-46cc-86e6-11ea6e2c5961
+
+MYSQL连接地址:
+hdm140015247.my3w.com:3306
+数据库名称：
+hdm140015247_db
+帐号:
+hdm140015247
+密码:
+hutianpei1211

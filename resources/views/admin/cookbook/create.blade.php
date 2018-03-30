@@ -68,7 +68,7 @@
                                 <label class="control-label col-md-4 col-sm-4" for="name">缩略图 * :</label>
                                 <div class="col-md-6 col-sm-6">
                                     <div class="">
-                                        <input id="uploadImg" type="file" name="uploadImg" multiple style="display: none" />
+                                        <input id="uploadImg" type="file" name="thumb" data-url="{{url('upload/uploadfile/jqueryfile')}}?_token={{csrf_token()}}" multiple style="display: none" />
                                         <div id="chooseFile">选择文件</div>
                                         <div id="uploadFile">开始上传</div>
                                         <div id="rechooseFile">重新选择</div>
@@ -229,24 +229,21 @@
             });
 
             $('#uploadImg').fileupload({
-                url : 'http://www.baidu.com',//请求发送的目标地址
                 Type : 'POST',//请求方式 ，可以选择POST，PUT或者PATCH,默认POST
-                //dataType : 'json',//服务器返回的数据类型
+                dataType : 'json',//服务器返回的数据类型
                 autoUpload : false,
                 acceptFileTypes : /(gif|jpe?g|png)$/i,//验证图片格式
                 maxNumberOfFiles : 1,//最大上传文件数目
-                maxFileSize : 1000000, // 文件上限1MB
+                maxFileSize : 2000000, // 文件上限1MB
                 minFileSize : 100,//文件下限  100b
                 messages : {//文件错误信息
                     acceptFileTypes : '文件类型不匹配',
                     maxFileSize : '文件过大',
                     minFileSize : '文件过小'
                 }
-            })
-            //图片添加完成后触发的事件
-                .on("fileuploadadd", function(e, data) {
-                    //validate(data.files[0])这里也可以手动来验证文件格式和大小
-
+            }).on("fileuploadadd", function(e, data) {
+                    //图片添加完成后触发的事件
+                    validate(data.files[0])//这里也可以手动来验证文件格式和大小
                     //隐藏或显示页面元素
                     $('#progress .bar').css(
                         'width', '0%'
@@ -291,7 +288,7 @@
                     $('#progress').show();
                     var progress = parseInt(data.loaded / data.total * 100, 10);
                     $('#progress').css(
-                        'width','15%'
+                        'width','40%'
                     );
                     $('#progress .bar').css(
                         'width',progress + '%'
@@ -299,25 +296,23 @@
                 })
                 //上传请求失败时触发的回调函数
                 .on("fileuploadfail", function(e, data) {
-                    console.log(data.errorThrown);
+                    console.log(11+data);
                 })
                 //上传请求成功时触发的回调函数
                 .on("fileuploaddone", function(e, data) {
-                    alert(data.result);
-
+                    console.log(22+data);
+                    $("#uploadImg").val(data.file_path);
                 })
                 //上传请求结束后，不管成功，错误或者中止都会被触发
                 .on("fileuploadalways", function(e, data) {
-
+                    console.log(33+data);
                 })
-
-
             //手动验证
             function validate(file) {
                 //获取文件名称
                 var fileName = file.name;
                 //验证图片格式
-                if (!/.(gif|jpg|jpeg|png|gif|jpg|png)$/.test(fileName)) {
+                if (!/.(gif|jpg|jpeg|png)$/.test(fileName)) {
                     console.log("文件格式不正确");
                     return true;
                 }
@@ -329,8 +324,8 @@
 
                 //获取文件大小
                 var fileSize = file.size;
-                if (fileSize > 1024 * 1024) {
-                    alert("文件不得大于一兆")
+                if (fileSize > 1024 * 1024 *2) {
+                    alert("文件不得大于2M")
                     return true;
                 }
                 return false;

@@ -8,11 +8,14 @@ use App\Http\Controllers\Controller;
 class UploadController extends Controller
 {
     public $file_servers = "http://img.diet_health.cc/";
-    public function updateFile(Request $request)
+    public function updateFile($type='editor1',Request $request)
     {
         if ($request->isMethod('post')) {
-
-            $file = $request->file("upload");
+            if($type=='editor1'){
+                $file = $request->file("upload");
+            }elseif($type=='jqueryfile'){
+                $file = $request->file("thumb");
+            }
 
             // 文件是否上传成功
             if ($file->isValid()) {
@@ -46,9 +49,25 @@ class UploadController extends Controller
                 // 使用我们新建的uploads本地存储空间（目录）
                 $bool = Storage::disk('upload')->put($filename, file_get_contents($realPath));
 
-                $callback = $_REQUEST["CKEditorFuncNum"];
-                echo "<script type='text/javascript'>window.parent.CKEDITOR.tools.callFunction($callback,'".$this->file_servers.$filename."','');</script>";
-                die;
+                if($type=='editor1'){
+                    $callback = $_REQUEST["CKEditorFuncNum"];
+                    echo "<script type='text/javascript'>window.parent.CKEDITOR.tools.callFunction($callback,'".$this->file_servers.$filename."','');</script>";
+                    die;
+                }else if($type=='jqueryfile'){
+                    //获取文件名
+                    $filearr = pathinfo($filename) ;
+                    $arr = [
+                        'total' =>'1',
+                        'success' =>'1',
+                        'message' =>'上传成功！',
+                        'files' =>[
+                            "srcName"=> $filearr['basename'],
+                            "success"=> true,
+                            "path"=> $this->file_servers.$filename
+                        ]
+                    ];
+                    echo json_encode($arr);
+                }
             }
 
         }
