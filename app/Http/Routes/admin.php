@@ -32,6 +32,9 @@ Route::group(['middleware' => ['auth:admin']], function ($router) {
     $router->get('ingredient/ajaxIndex',['uses'=>'IngredientController@ajaxIndex','as'=>'admin.ingredient.ajaxIndex']);
     $router->resource('ingredient', 'IngredientController');
 
+    //食材分类管理
+    $router->resource('ingredienttype', 'IngredientTypeController');
+
     //营养价值管理
     $router->get('nutritive/ajaxIndex',['uses'=>'NutritiveController@ajaxIndex','as'=>'admin.nutritive.ajaxIndex']);
     $router->resource('nutritive', 'NutritiveController');

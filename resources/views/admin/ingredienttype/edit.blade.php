@@ -2,7 +2,7 @@
 
 @section('admin-css')
     <link href="{{ asset('asset_admin/assets/plugins/parsley/src/parsley.css') }}" rel="stylesheet" />
-    <link href="{{ asset('asset_admin/assets/plugins/bootstrap-select/bootstrap-select.min.css') }}" rel="stylesheet" />
+    <link href="{{ asset('asset_admin/assets/plugins/jstree/dist/themes/default/style.min.css') }}" rel="stylesheet" />
 @endsection
 
 @section('admin-content')
@@ -10,12 +10,12 @@
         <!-- begin breadcrumb -->
         <ol class="breadcrumb pull-right">
             <li><a href="javascript:;">主页</a></li>
-            <li><a href="javascript:;">菜单列表</a></li>
-            <li class="active">新增</li>
+            <li><a href="javascript:;">食材分类列表</a></li>
+            <li class="active">编辑食材分类</li>
         </ol>
         <!-- end breadcrumb -->
         <!-- begin page-header -->
-        <h1 class="page-header">新增菜单</h1>
+        <h1 class="page-header">食材分类修改</h1>
         <!-- end page-header -->
 
         <!-- begin row -->
@@ -43,55 +43,26 @@
                         </div>
                     @endif
                     <div class="panel-body panel-form">
-                        <form class="form-horizontal form-bordered" data-parsley-validate="true" action="{{ url('admin/menus') }}" method="POST">
+                        <form class="form-horizontal form-bordered" data-parsley-validate="true" action="{{ url('admin/ingredienttype/'.$data['id']) }}" method="post">
                             {{ csrf_field() }}
+                            {{ method_field('patch') }}
                             <div class="form-group">
-                                <label class="control-label col-md-4 col-sm-4" for="name">菜单名称 * :</label>
+                                <label class="control-label col-md-4 col-sm-4" for="name">食材分类名称 * :</label>
                                 <div class="col-md-6 col-sm-6">
-                                    <input class="form-control" type="text" name="name" placeholder="菜单名称" data-parsley-required="true" data-parsley-required-message="请输入菜单名称" value="{{ old('name') }}"/>
+                                    <input class="form-control" type="text" name="name" placeholder="食材分类名称" data-parsley-required="true" data-parsley-required-message="请输入食材分类名称" value="{{ $data['name'] }}"/>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label class="control-label col-md-4 col-sm-4" for="slug">排序 * :</label>
                                 <div class="col-md-4 col-sm-4">
-                                    <input class="form-control" type="text" name="sort" placeholder="排序" data-parsley-required="true" data-parsley-required-message="请输入排序" />升序
+                                    <input class="form-control" type="text" name="sort" placeholder="排序" data-parsley-required="true" data-parsley-required-message="请输入排序" value="{{ $data['sort'] }}" />升序
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="control-label col-md-4 col-sm-4" for="url">菜单链接 * :</label>
+                                <label class="control-label col-md-4 col-sm-4" for="icon">上级分类 * :</label>
                                 <div class="col-md-6 col-sm-6">
-                                    <input class="form-control" type="text" name="url" placeholder="菜单链接" data-parsley-required="true" data-parsley-required-message="请输入菜单链接" />
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label col-md-4 col-sm-4" for="slug">权限名称 * :</label>
-                                <div class="col-md-6 col-sm-6">
-                                    <input class="form-control" type="text" name="slug" placeholder="权限名称" data-parsley-required="true" data-parsley-required-message="请输入权限名称" />
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label col-md-4 col-sm-4" for="icon">菜单图标 * :</label>
-                                <div class="col-md-6 col-sm-6">
-                                    <input class="form-control" type="text" name="icon" placeholder="菜单图标" />
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label col-md-4 col-sm-4" for="icon">上级菜单 * :</label>
-                                <div class="col-md-6 col-sm-6">
-                                    <select class="form-control selectpicker"
-                                            data-live-search="true"
-                                            data-style="btn-white"
-                                            data-parsley-required="true"
-                                            data-parsley-errors-container="#parent_id_error"
-                                            data-parsley-required-message="请选择上级菜单"
-                                            name="parent_id">
-                                        <option value="">-- 请选择 --</option>
-                                        <option value="0">顶级菜单</option>
-                                        @foreach($topMenus as $menu)
-                                        <option value="{{ $menu->id }}">{{ $menu->name }}</option>
-                                        @endforeach
-                                    </select>
-                                    <p id="parent_id_error"></p>
+                                    <div id="jstree_pid"></div>
+                                    <input type="hidden" name="pid" attr_id="{{ $data['id'] }}" value="{{ $data['pid'] }}">
                                 </div>
                             </div>
                             <div class="form-group">
@@ -114,7 +85,24 @@
 @section('admin-js')
     <script src="{{ asset('asset_admin/assets/plugins/parsley/dist/parsley.js') }}"></script>
     <script src="{{ asset('asset_admin/assets/plugins/bootstrap-select/bootstrap-select.min.js') }}"></script>
+    <script src="{{ asset('asset_admin/assets/plugins/jstree/dist/jstree.min.js') }}"></script>
     <script>
-        $('.selectpicker').selectpicker('render');
+        //一般data从后台返回，调用这个方法显示视图\
+        $('#jstree_pid').jstree({
+            "plugins" : [ "wholerow", "checkbox"],
+            "checkbox" : {
+                "three_state": false,  //取消级联
+            },
+            'core' : {
+                'multiple':false,  //设置单选
+                'data' : <?php echo json_encode($json_data); ?>
+            }
+        }).on('changed.jstree', function (e, data) {
+            if(data.instance.get_node(data.selected[0]).id == $("input[name='pid']").attr("attr_id")){
+                alert("上级分类不能选择自己！");
+                return false;
+            }
+            $("input[name='pid']").val(data.instance.get_node(data.selected[0]).id);
+        }) ;
     </script>
 @endsection

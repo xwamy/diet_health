@@ -8,10 +8,12 @@ use Illuminate\Http\Request;
 use App\Http\Requests\IngredientRequest;
 use App\Http\Controllers\Controller;
 use App\Repositories\Eloquent\IngredientRepositoryEloquent  as IngredientRepository;
+use App\Repositories\Eloquent\IngredientTypeRepositoryEloquent  as IngredientTypeRepository;
 
 class IngredientController extends Controller
 {
     public $Ingredient;
+    public $IngredientType;
     public $role;
     public $nutritive_type = [
         '1'=>['id'=>'1','display_name'=>'内补'],
@@ -19,10 +21,11 @@ class IngredientController extends Controller
         '3'=>['id'=>'3','display_name'=>'维生素'],
         '4'=>['id'=>'4','display_name'=>'微量元素'],
     ];
-    public function __construct(IngredientRepository $IngredientRepository,RoleRepositoryEloquent $roleRepository)
+    public function __construct(IngredientRepository $IngredientRepository,IngredientTypeRepository $IngredientTypeRepository,RoleRepositoryEloquent $roleRepository)
     {
         $this->middleware('CheckPermission:ingredient');
         $this->Ingredient = $IngredientRepository;
+        $this->IngredientType = $IngredientTypeRepository;
         $this->role = $roleRepository;
     }
 
@@ -39,7 +42,8 @@ class IngredientController extends Controller
      */
     public function create()
     {
-        return view('admin.ingredient.create',['nutritive_type'=>$this->nutritive_type]);
+        $json_data = $this->IngredientType->getJsonArr();
+        return view('admin.ingredient.create',['nutritive_type'=>$this->nutritive_type,'json_data'=>$json_data]);
     }
     /*
      * 新增入库
@@ -62,7 +66,14 @@ class IngredientController extends Controller
         foreach($rel_original as $v){
             $rel_lists[] = $v->nutritive_id;
         }
-        return view('admin.ingredient.edit',['nutritive_type'=>$this->nutritive_type,'data'=>$data,'nutritive_lists'=>$nutritive_lists,'rel_lists'=>$rel_lists]);
+        $json_data = $this->IngredientType->getJsonArr();
+        foreach($json_data as $k=>$v){
+            if($data['ingredient_type'] == $v['id']){
+                $json_data[$k]['state']['opened'] = 'true';
+                $json_data[$k]['state']['selected'] = 'true';
+            }
+        }
+        return view('admin.ingredient.edit',['nutritive_type'=>$this->nutritive_type,'data'=>$data,'nutritive_lists'=>$nutritive_lists,'rel_lists'=>$rel_lists,'json_data'=>$json_data]);
     }
     /*
      * 编辑入库

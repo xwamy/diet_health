@@ -94,17 +94,15 @@ class CookbookRepositoryEloquent extends BaseRepository
         $cookbook = new Cookbook();
         $cookbook->name = $attr['name'];
         $cookbook->sort = $attr['sort'];
-        if(!empty($attr['description'])){
-            $cookbook->description = $attr['description'];
-        }else{
-            $cookbook->description = mb_substr($attr['practice'], 0, 100, 'utf-8').'...';
-        }
+        $cookbook->description = $attr['description'];
+        $cookbook->thumb = $attr['thumb'];
         $cookbook->timer = $attr['timer'];
         $cookbook->people_num = $attr['people_num'];
         $cookbook->cooking_way_id = $attr['cooking_way_id'];
         $cookbook->taste_id = $attr['taste_id'];
         $cookbook->nutritive_id = $attr['nutritive_id'];
         $cookbook->difficulty = $attr['difficulty'];
+        $cookbook->practice = $attr['practice'];
         $cookbook->skill = $attr['skill'];
         $cookbook->food_type = $attr['food_type'];
         $cookbook->publisher = '0';

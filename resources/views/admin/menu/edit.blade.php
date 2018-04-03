@@ -59,6 +59,12 @@
                                 </div>
                             </div>
                             <div class="form-group">
+                                <label class="control-label col-md-4 col-sm-4" for="slug">排序 * :</label>
+                                <div class="col-md-4 col-sm-4">
+                                    <input class="form-control" type="text" name="sort" placeholder="排序" data-parsley-required="true" data-parsley-required-message="请输入排序" value="{{ $menu['sort'] }}" />升序
+                                </div>
+                            </div>
+                            <div class="form-group">
                                 <label class="control-label col-md-4 col-sm-4" for="slug">权限名称 * :</label>
                                 <div class="col-md-6 col-sm-6">
                                     <input class="form-control" type="text" name="slug" placeholder="权限名称" data-parsley-required="true" data-parsley-required-message="请输入权限名称" value="{{ $menu['slug'] }}"/>

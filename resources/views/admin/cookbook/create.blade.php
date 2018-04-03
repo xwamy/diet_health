@@ -86,18 +86,18 @@
                             <div class="form-group">
                                 <label class="control-label col-md-4 col-sm-4" for="name">简介 * :</label>
                                 <div class="col-md-6 col-sm-6">
-                                    <textarea class="form-control" placeholder="请输入简介..."  name="description" rows="5"></textarea>
+                                    <textarea class="form-control" placeholder="请输入简介..." data-parsley-required="true"  data-parsley-required-message="请输入简介"  name="description" rows="5"></textarea>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label class="control-label col-md-4 col-sm-4" for="name">烹饪时长 * :</label>
-                                <div class="col-md-6 col-sm-6">
-                                    <input class="form-control" type="text" name="timer" placeholder="烹饪时长" data-parsley-required="true" data-parsley-type="integer" data-parsley-required-message="请输入烹饪时长" />
+                                <div class="col-md-2 col-sm-2">
+                                    <input class="form-control" type="text" name="timer" placeholder="烹饪时长" data-parsley-required="true" data-parsley-type="integer" data-parsley-required-message="请输入烹饪时长" />单位：分钟
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label class="control-label col-md-4 col-sm-4" for="name">可食用人数 * :</label>
-                                <div class="col-md-6 col-sm-6">
+                                <div class="col-md-2 col-sm-2">
                                     <input class="form-control" type="number" min="1" name="people_num" placeholder="可食用人数" data-parsley-required="true" data-parsley-type="number" data-parsley-required-message="请输入可食用人数" />
                                 </div>
                             </div>
@@ -108,13 +108,13 @@
                                             data-live-search="true"
                                             data-style="btn-white"
                                             data-parsley-required="true"
-                                            data-parsley-errors-container="#role_error"
-                                            data-parsley-required-message="烹饪方式"
+                                            data-parsley-errors-container="#cooking_way_error"
+                                            data-parsley-required-message="请选择烹饪方式"
                                             name="cooking_way_id">
                                         <option value="">-- 请选择 --</option>
 
                                     </select>
-                                    <p id="role_error"></p>
+                                    <p id="cooking_way_error"></p>
                                 </div>
                             </div>
                             <div class="form-group">
@@ -124,13 +124,13 @@
                                             data-live-search="true"
                                             data-style="btn-white"
                                             data-parsley-required="true"
-                                            data-parsley-errors-container="#role_error"
-                                            data-parsley-required-message="口味"
+                                            data-parsley-errors-container="#taste_error"
+                                            data-parsley-required-message="请选择口味"
                                             name="taste_id">
                                         <option value="">-- 请选择 --</option>
 
                                     </select>
-                                    <p id="role_error"></p>
+                                    <p id="taste_error"></p>
                                 </div>
                             </div>
                             <div class="form-group">
@@ -140,15 +140,15 @@
                                             data-live-search="true"
                                             data-style="btn-white"
                                             data-parsley-required="true"
-                                            data-parsley-errors-container="#role_error"
-                                            data-parsley-required-message="营养类型"
+                                            data-parsley-errors-container="#nutritive_error"
+                                            data-parsley-required-message="请选择营养类型"
                                             name="nutritive_type">
                                         <option value="">-- 请选择 --</option>
                                         @foreach($nutritive_type as $key=>$value)
                                             <option value="{{ $value['id'] }}">{{ $value['display_name'] }}</option>
                                         @endforeach
                                     </select>
-                                    <p id="role_error"></p>
+                                    <p id="nutritive_error"></p>
                                 </div>
                             </div>
 
@@ -169,13 +169,13 @@
                             <div class="form-group">
                                 <label class="col-md-4 control-label">菜谱做法 * ：</label>
                                 <div class="col-md-8">
-                                    <textarea class="ckeditor" id="editor1" name="practice" rows="20"></textarea>
+                                    <textarea class="ckeditor" id="editor1" name="practice" rows="20"></textarea> <!--data-parsley-required="true"  data-parsley-required-message="请输入菜谱做法"-->
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label class="control-label col-md-4 col-sm-4" for="name">制作技巧 * :</label>
                                 <div class="col-md-6 col-sm-6">
-                                    <textarea class="form-control" placeholder="请输入制作技巧..."  name="skill" rows="5"></textarea>
+                                    <textarea class="form-control" name="skill" placeholder="请输入制作技巧..."  data-parsley-required="true"  data-parsley-required-message="请输入制作技巧" rows="5"></textarea>
                                 </div>
                             </div>
 
@@ -186,8 +186,8 @@
                                             data-live-search="true"
                                             data-style="btn-white"
                                             data-parsley-required="true"
-                                            data-parsley-errors-container="#role_error"
-                                            data-parsley-required-message="食物类型"
+                                            data-parsley-errors-container="#food_type_error"
+                                            data-parsley-required-message="请选择食物类型"
                                             name="food_type">
                                         <option value="">-- 请选择 --</option>
                                         @foreach($food_type as $key=>$value)
@@ -306,6 +306,7 @@
                 //上传请求成功时触发的回调函数
                 .on("fileuploaddone", function(e,data) {
                     //上传成功并将地址写入到input框
+                    $("#progress").css('display',"none");
                     alert(data.result.message);
                     $("#uploadImg_path").val(data.result.file_path);
                 })
@@ -409,7 +410,13 @@
                     var nutritive_lists = data.data;
                     var html ="";
                     $.each(nutritive_lists, function(key, val) {
-                        html +='<label class="radio-inline"> <input type="radio" name="nutritive_id" value="'+val.id+'" />'+val.name+'</label>';
+                        html +='<label class="radio-inline" style="line-height: 21px;"> <input type="radio" name="nutritive_id" value="'+val.id+'"';
+
+                        if(key==0){
+                            html += 'checked="checked" />'+val.name+'</label>';
+                        }else{
+                            html += '/>'+val.name+'</label>';
+                        }
                     });
                     $("#nutritive_lists").html(html);
                     renderSwitcher();

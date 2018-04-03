@@ -30,6 +30,7 @@ class CookbookRequest extends Request
             'practice'=>'required',
             'skill'=>'required',
             'food_type'=>'required',
+            'thumb'=>'required',
         ];
     }
 
@@ -43,6 +44,7 @@ class CookbookRequest extends Request
             'practice.required'=>'请输入菜谱做法',
             'skill.required'=>'请选择制作技巧',
             'food_type.required'=>'请输入食物类型',
+            'thumb.required'=>'请上传缩略图',
         ];
     }
 }

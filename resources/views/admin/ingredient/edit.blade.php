@@ -4,6 +4,7 @@
     <link href="{{ asset('asset_admin/assets/plugins/parsley/src/parsley.css') }}" rel="stylesheet" />
     <link href="{{ asset('asset_admin/assets/plugins/bootstrap-select/bootstrap-select.min.css') }}" rel="stylesheet" />
     <link href="{{ asset('asset_admin/assets/plugins/switchery/switchery.min.css') }}" rel="stylesheet" />
+    <link href="{{ asset('asset_admin/assets/plugins/jstree/dist/themes/default/style.min.css') }}" rel="stylesheet" />
 @endsection
 
 @section('admin-content')
@@ -96,6 +97,13 @@
                                 </div>
                             </div>
                             <div class="form-group">
+                                <label class="control-label col-md-4 col-sm-4" for="icon">食材分类 * :</label>
+                                <div class="col-md-6 col-sm-6">
+                                    <div id="jstree_ingredient_type"></div>
+                                    <input type="hidden" name="ingredient_type" value="{{ $data['ingredient_type'] }}">
+                                </div>
+                            </div>
+                            <div class="form-group">
                                 <label class="control-label col-md-4 col-sm-4"></label>
                                 <div class="col-md-6 col-sm-6">
                                     <button type="submit" class="btn btn-primary">提交</button>
@@ -116,12 +124,27 @@
     <script src="{{ asset('asset_admin/assets/plugins/parsley/dist/parsley.js') }}"></script>
     <script src="{{ asset('asset_admin/assets/plugins/bootstrap-select/bootstrap-select.min.js') }}"></script>
     <script src="{{ asset('asset_admin/assets/plugins/switchery/switchery.min.js') }}"></script>
+    <script src="{{ asset('asset_admin/assets/plugins/jstree/dist/jstree.min.js') }}"></script>
     <script>
         $('.selectpicker').selectpicker('render');
 
         $(document).ready(function() {
             renderSwitcher();
         });
+
+        //一般data从后台返回，调用这个方法显示视图\
+        $('#jstree_ingredient_type').jstree({
+            "plugins" : [ "wholerow", "checkbox"],
+            "checkbox" : {
+                "three_state": false,  //取消级联
+            },
+            'core' : {
+                'multiple':false,  //设置单选
+                'data' : <?php echo json_encode($json_data); ?>
+            }
+        }).on('changed.jstree', function (e, data) {
+            $("input[name='ingredient_type']").val(data.instance.get_node(data.selected[0]).id);
+        }) ;
 
         $("select[name='nutritive_type']").change(function () {
             $.ajax({

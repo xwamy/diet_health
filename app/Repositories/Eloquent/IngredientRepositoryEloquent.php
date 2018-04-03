@@ -72,7 +72,7 @@ class IngredientRepositoryEloquent extends BaseRepository
 
     public function editViewData($id)
     {
-        $data = $this->find($id, ['id', 'name', 'sort','nutritive_type'])->toArray();
+        $data = $this->find($id, ['id', 'name', 'sort','nutritive_type','ingredient_type'])->toArray();
         if ($data) {
             return $data;
         }
@@ -105,10 +105,14 @@ class IngredientRepositoryEloquent extends BaseRepository
         if (!empty($data)) {
             abort(500, '食材已存在！');
         }
+        $ingredient_type = DB::table('ingredient_type')->where('id', $attr['nutritive_type'])->first();
+
         $cooking_ways = new Ingredient();
         $cooking_ways->name = $attr['name'];
         $cooking_ways->sort = $attr['sort'];
         $cooking_ways->nutritive_type = $attr['nutritive_type'];
+        $cooking_ways->ingredient_type = $attr['ingredient_type'];
+        $cooking_ways->ingredient_type_name = $ingredient_type->name;
         $cooking_ways->cTime = date("Y-m-d H:i:s");
         $cooking_ways->save();
 
