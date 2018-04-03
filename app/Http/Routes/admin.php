@@ -45,6 +45,7 @@ Route::group(['middleware' => ['auth:admin']], function ($router) {
 
     //菜谱教程管理
     $router->get('cookbook/ajaxIndex',['uses'=>'CookbookController@ajaxIndex','as'=>'admin.cookbook.ajaxIndex']);
+    $router->get('cookbook/ajaxIngredienttype',['uses'=>'CookbookController@ajaxIngredienttype','as'=>'admin.cookbook.ajaxIngredienttype']);
     $router->resource('cookbook', 'CookbookController');
 });
 

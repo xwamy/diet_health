@@ -2,7 +2,19 @@
 #uploadImg{
     display: none;
 }
-
+.add_ingredient{
+    background: #348fe2;color: #fff;width:5rem;height:3rem;text-align: center;border-radius: 0.3rem;line-height:2rem;cursor:pointer;margin-bottom:1rem;
+}
+.add_ingredient:hover{
+    background: #2a72b5;color:#fff;text-decoration:none;
+}
+.del_ingredient{
+    background: #348fe2;color: #fff;width:5rem;height:3rem;text-align: center;border-radius: 0.3rem;line-height:2rem;cursor:pointer;margin-bottom:1rem;
+}
+.del_ingredient:hover{
+    background: #2a72b5;color:#fff;text-decoration:none;
+}
+.ingredienttype_select{width:7rem;float:left;margin-left:0.5rem;}
 /* button样式 */
 #chooseFile{
     background: #348fe2;color: #fff;width:6rem;height:2.5rem;text-align: center;border-radius: 0.3rem;line-height:2.5rem;cursor:pointer;margin-bottom:1rem;

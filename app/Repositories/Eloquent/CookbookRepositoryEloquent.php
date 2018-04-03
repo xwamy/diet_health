@@ -54,7 +54,7 @@ class CookbookRepositoryEloquent extends BaseRepository
 
         if ($this->model) {
             foreach ($this->model as $item) {
-                $item->button = $item->getActionButtons('ingredient');
+                $item->button = $item->getActionButtons('cookbook');
             }
         }
         return [
@@ -76,7 +76,16 @@ class CookbookRepositoryEloquent extends BaseRepository
     //根据ID获取营养价值
     public function getNutritiveById($Id)
     {
-        $data = DB::table('nutritive')->where('id', $Id)->get();
+        $data = DB::table('nutritive')->where('id', $Id)->first();
+        if ($data) {
+            return $data;
+        }
+        abort(404);
+    }
+    //根据分类获取营养价值
+    public function getNutritiveByType($Type)
+    {
+        $data = DB::table('nutritive')->where('type', $Type)->get();
         if ($data) {
             return $data;
         }
@@ -111,18 +120,28 @@ class CookbookRepositoryEloquent extends BaseRepository
         $cookbook->save();
 
         //新增食谱与食材的关系
-        foreach($attr['ingredients'] as $v){
+        foreach($attr['ingredients_id'] as $k=>$v){
+            $ids = explode(',',$v);
+            $num = count($ids);
             $ingredients_cookbook_rel[] =
             [
                 'cookbook_id'=>$cookbook->id,
-                'ingredients_id'=>$v['ingredients_id'],
-                'main'=>$v['main'],
+                'ingredients_id'=>$ids[$num-1],
+                'main'=>$attr['main'][$k],
             ];
         }
-
         DB::table('ingredients_cookbook_rel')->insert($ingredients_cookbook_rel);
 
         flash('食谱新增成功', 'success');
+    }
+    //根据分类获取营养价值
+    public function getIngredientsCookbookRel($cookbook_id)
+    {
+        $data = DB::table('ingredients_cookbook_rel')->where('cookbook_id', $cookbook_id)->get();
+        if ($data) {
+            return $data;
+        }
+        abort(404);
     }
     /*
      * 修改

@@ -3,15 +3,18 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Repositories\Eloquent\RoleRepositoryEloquent;
-use App\Repositories\Eloquent\CookbookRepositoryEloquent;
 use Illuminate\Http\Request;
 use App\Http\Requests\CookbookRequest;
 use App\Http\Controllers\Controller;
 use App\Repositories\Eloquent\CookbookRepositoryEloquent  as CookbookRepository;
+use App\Repositories\Eloquent\IngredientRepositoryEloquent  as IngredientRepository;
+use App\Repositories\Eloquent\IngredientTypeRepositoryEloquent  as IngredientTypeRepository;
 
 class CookbookController extends Controller
 {
     public $Cookbook;
+    public $Ingredient;
+    public $IngredientType;
     public $role;
     public $nutritive_type = [
         '1'=>['id'=>'1','display_name'=>'内补'],
@@ -26,10 +29,12 @@ class CookbookController extends Controller
         '4'=>['id'=>'4','name'=>'饮料'],
         '5'=>['id'=>'5','name'=>'零食'],
     ];
-    public function __construct(CookbookRepository $Cookbook,RoleRepositoryEloquent $roleRepository)
+    public function __construct(CookbookRepository $Cookbook,IngredientTypeRepository $IngredientTypeRepository,IngredientRepository $IngredientRepository,RoleRepositoryEloquent $roleRepository)
     {
         $this->middleware('CheckPermission:cookbook');
         $this->Cookbook = $Cookbook;
+        $this->Ingredient = $IngredientRepository;
+        $this->IngredientType = $IngredientTypeRepository;
         $this->role = $roleRepository;
     }
 
@@ -46,7 +51,8 @@ class CookbookController extends Controller
      */
     public function create()
     {
-        return view('admin.cookbook.create',['nutritive_type'=>$this->nutritive_type,'food_type'=>$this->food_type]);
+        $ingredienttype = $this->IngredientType->findWhere(['pid'=>0])->toArray();
+        return view('admin.cookbook.create',['nutritive_type'=>$this->nutritive_type,'food_type'=>$this->food_type,'ingredienttype'=>$ingredienttype]);
     }
     /*
      * 新增入库
@@ -62,14 +68,18 @@ class CookbookController extends Controller
      */
     public function edit($id)
     {
-        $data= $this->Cookbook->editViewData($id);
-        $nutritive_lists= $this->Cookbook->getNutritiveByType($data['nutritive_type']); //获取选择类型下的所有营养价值
-        $rel_original= $this->Cookbook->getNutritiveRelById($data['id']);  //获取关联的营养价值信息
-        $rel_lists = [];
-        foreach($rel_original as $v){
-            $rel_lists[] = $v->nutritive_id;
-        }
-        return view('admin.cookbook.edit',['nutritive_type'=>$this->nutritive_type,'data'=>$data,'nutritive_lists'=>$nutritive_lists,'rel_lists'=>$rel_lists]);
+        $data= $this->Cookbook->editViewData($id);      //获取编辑数据
+        $nutritive = $this->Cookbook->getNutritiveById($data['nutritive_id']);   //获取营养价值
+        $ingredienttype = $this->IngredientType->findWhere(['pid'=>0])->toArray();  //获取食材分类
+        $ingredients = $this->Cookbook->getIngredientsCookbookRel($data['id']);   //获取关联的食材
+        $return = [
+            'nutritive_type'=>$this->nutritive_type,
+            'nutritive'=>$nutritive,
+            'data'=>$data,
+            'food_type'=>$this->food_type,
+            'ingredienttype'=>$ingredienttype
+        ];
+        return view('admin.cookbook.edit',$return);
     }
     /*
      * 编辑入库
@@ -92,6 +102,32 @@ class CookbookController extends Controller
     public function ajaxIndex(Request $request)
     {
         $result = $this->Cookbook->ajaxIndex($request);
+        return response()->json($result,JSON_UNESCAPED_UNICODE);
+    }
+    //获取下级食材分类
+    public function ajaxIngredienttype(Request $request)
+    {
+        $IngredientType= $this->IngredientType->findWhere(['pid'=>$request->all()['parentid']])->toArray();
+        $result = [];
+        //拼接JS所需要的数组
+        foreach($IngredientType as $v){
+            $result[] = [
+                'id'=>$v['id'],
+                'parentid'=>$v['pid'],
+                'name'=>$v['name'],
+            ];
+        }
+        //如果分类不存在，那么就去查询食材
+        if(empty($IngredientType)){
+            $ingredient = $this->Ingredient->findWhere(['ingredient_type'=>$request->all()['parentid']])->toArray();
+            foreach($ingredient as $v){
+                $result[] = [
+                    'id'=>$v['id'],
+                    'parentid'=>$v['ingredient_type'],
+                    'name'=>$v['name'],
+                ];
+            }
+        }
         return response()->json($result,JSON_UNESCAPED_UNICODE);
     }
 }

@@ -1,7 +1,7 @@
 @extends('admin.layouts.admin')
 
 @section('admin-css')
-    <link href="{{ asset('asset_admin/assets/xin_upload/upload.css') }}" rel="stylesheet" />
+    <link href="{{ asset('asset_admin/assets/xin/upload.css') }}" rel="stylesheet" />
 
     <link href="{{ asset('asset_admin/assets/plugins/parsley/src/parsley.css') }}" rel="stylesheet" />
     <link href="{{ asset('asset_admin/assets/plugins/bootstrap-select/bootstrap-select.min.css') }}" rel="stylesheet" />
@@ -167,6 +167,15 @@
                                 </div>
                             </div>
                             <div class="form-group">
+                                <label class="col-md-4 control-label">选择食材 * ：</label>
+                                <div class="col-md-8">
+                                    <div id="add_ingredient" class="btn add_ingredient">新增</div>
+                                    <table class="table table-striped table-hover" id="reportTable">
+
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="form-group">
                                 <label class="col-md-4 control-label">菜谱做法 * ：</label>
                                 <div class="col-md-8">
                                     <textarea class="ckeditor" id="editor1" name="practice" rows="20"></textarea> <!--data-parsley-required="true"  data-parsley-required-message="请输入菜谱做法"-->
@@ -222,13 +231,33 @@
     <script src="{{ asset('asset_admin/assets/plugins/jquery-file-upload/js/vendor/jquery.ui.widget.js') }}"></script>
     <script src="{{ asset('asset_admin/assets/plugins/jquery-file-upload/js/jquery.iframe-transport.js') }}"></script>
     <script src="{{ asset('asset_admin/assets/plugins/jquery-file-upload/js/jquery.fileupload.js') }}"></script>
+    <script src="{{ asset('asset_admin/assets/js/jQuery.CascadingSelect.js') }}"></script>
+
 
     <script>
         $(function(){
+            //点击新增一行食材
+            $('#add_ingredient').click(function(){
+                var num = $('#reportTable tr').length;
+                var html_class = "ingredienttype_td_"+num;
+                var html = '<tr class="add_list">'
+                    +'<td class="'+ html_class +'">'
+                    +'</td><td width="20%">'
+                    +'<select class="form-control" name="main[]"><option value="1">主料</option><option value="2">辅料</option></select>'
+                    +'</td><td width="10%">'
+                    +'<div class="btn del_ingredient">删除</div></td></tr>';
+                $('#reportTable').append(html);
+
+                $("."+html_class).CascadingSelect({data:"0"}); //无限极下拉框
+                $(".del_ingredient").click(function (){      //删除一行
+                    $(this).parents('tr').remove();
+                });
+            });
+
+            //上传图片
             $("#chooseFile").on("click", function() {
                 $("#uploadImg").click();
             });
-
             $('#uploadImg').fileupload({
                 Type : 'POST',//请求方式 ，可以选择POST，PUT或者PATCH,默认POST
                 dataType : 'json',//服务器返回的数据类型
@@ -400,6 +429,7 @@
                 filebrowserUploadUrl: '{{url('upload/uploadfile')}}?_token={{csrf_token()}}'//上传文件
             });
         });
+        //营养价值类型发生改变后重新获取该类型下的营养价值
         $("select[name='nutritive_type']").change(function () {
             $.ajax({
                 url:'{{ url('admin/nutritive/ajaxIndex') }}',

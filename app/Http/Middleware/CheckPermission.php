@@ -12,6 +12,7 @@ class CheckPermission{
         switch ($routeName){
             case "admin.{$m}.index":
             case "admin.{$m}.ajaxIndex": $permission = "{$m}.list";     break;
+            case "admin.{$m}.ajaxIngredienttype": $permission = "{$m}.list";     break;
             case "admin.{$m}.create":
             case "admin.{$m}.store":     $permission = "{$m}.add";      break;
             case "admin.{$m}.edit":
