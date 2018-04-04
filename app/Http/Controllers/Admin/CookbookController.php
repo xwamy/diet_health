@@ -75,6 +75,7 @@ class CookbookController extends Controller
         $return = [
             'nutritive_type'=>$this->nutritive_type,
             'nutritive'=>$nutritive,
+            'ingredients'=>$ingredients,
             'data'=>$data,
             'food_type'=>$this->food_type,
             'ingredienttype'=>$ingredienttype

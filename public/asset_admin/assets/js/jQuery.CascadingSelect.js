@@ -47,19 +47,23 @@
             @param id   自身ID号
             */
             function createSelect(container, parentid, id) {
-
-                //创建select对象，并将select对象放入container内
-                var _select = $("<select></select>").appendTo(container).addClass(settings.cssName);
-
                 //如果parentid为空，则_parentid值为0
                 var _parentid = parentid || 0;
 
                 //发送AJAX请求,返回的data必须为json格式
-                $.getJSON(settings.url, { parentid: _parentid }, function (data) {
-
-                    //添加子节点<option>
-                    addOptions(container, _select, data).val(id || -1)
-
+                $.ajax({
+                    type:'GET',
+                    url:settings.url,//请求的url地址
+                    async: false,//设置成同步
+                    dataType:'json',
+                    data:{ parentid: _parentid},
+                    success:function(data){
+                        if(data.length != 0){
+                            //创建select对象，并将select对象放入container内
+                            var _select = $("<select></select>").appendTo(container).addClass(settings.cssName);
+                            addOptions(container, _select, data ).val(id || -1);
+                        }
+                    }
                 });
             }
 
@@ -100,26 +104,33 @@
                     nextAll.remove();
                 }
 
-                $.getJSON(settings.url, { parentid: id }, function (data) {
-                    if (data.length > 0) {
-                        var _html = $("<select class='" + settings.cssName + "'></select>");
-                        var _select = addOptions(container, _html, data);
+                $.ajax({
+                    type:'GET',
+                    url:settings.url,//请求的url地址
+                    async: false,//设置成同步
+                    dataType:'json',
+                    data:{ parentid: id},
+                    success:function(data){
+                        if (data.length > 0) {
+                            var _html = $("<select class='" + settings.cssName + "'></select>");
+                            var _select = addOptions(container, _html, data);
 
-                        //判断当前select对象后面是否跟有select对象
-                        if (nextAll.length < 1) {
+                            //判断当前select对象后面是否跟有select对象
+                            if (nextAll.length < 1) {
 
-                            select.after(_select); //没有则直接添加
+                                select.after(_select); //没有则直接添加
 
-                        } else {
+                            } else {
 
-                            nextAll.remove(); //有则先移除再添加
-                            select.after(_select);
+                                nextAll.remove(); //有则先移除再添加
+                                select.after(_select);
+                            }
                         }
+                        else {
+                            nextAll.remove(); //没有子项则后面的select全部移除
+                        }
+                        saveVal(container); //进行数据保存，此方法必须放在回调函数里面
                     }
-                    else {
-                        nextAll.remove(); //没有子项则后面的select全部移除
-                    }
-                    saveVal(container); //进行数据保存，此方法必须放在回调函数里面
                 });
 
                 //saveVal(container); //如果放在这里，则会出现bug

@@ -19,6 +19,7 @@
 #chooseFile{
     background: #348fe2;color: #fff;width:6rem;height:2.5rem;text-align: center;border-radius: 0.3rem;line-height:2.5rem;cursor:pointer;margin-bottom:1rem;
 }
+#nutritive_lists ul{display:none;}
 #chooseFile:hover{
     background: #2a72b5;text-decoration:none;
 }

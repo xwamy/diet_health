@@ -127,6 +127,7 @@ class CookbookRepositoryEloquent extends BaseRepository
             [
                 'cookbook_id'=>$cookbook->id,
                 'ingredients_id'=>$ids[$num-1],
+                'ingredients'=>$v,
                 'main'=>$attr['main'][$k],
             ];
         }
@@ -158,19 +159,21 @@ class CookbookRepositoryEloquent extends BaseRepository
         if ($res) {
             $rel_datas = DB::table('ingredients_cookbook_rel')->where('cookbook_id', $id)->get();
 
-            foreach($attr['ingredients'] as $v){
-                $rel_data = DB::table('ingredients_cookbook_rel')->where(['ingredients_id'=>$v['ingredients_id'],'cookbook_id'=>$id,'main'=>$v['main']])->first();
+            foreach($attr['ingredients_id'] as $k=>$v){
+                $ids = explode(',',$v);
+                $num = count($ids);
+                $rel_data = DB::table('ingredients_cookbook_rel')->where(['ingredients_id'=>$ids[$num-1],'cookbook_id'=>$id,'main'=>$attr['main'][$k]])->first();
                 if(!empty($rel_data)){
                     // 循环删除库中的匹配到的数据
-                    foreach($rel_datas as $k=>$c){
+                    foreach($rel_datas as $a=>$c){
                         if($c->id == $rel_data->id){
-                            unset($rel_datas[$k]);
+                            unset($rel_datas[$a]);
                         }
                     }
                     continue;
                 }
                 //库里不存在就添加
-                $ingredients_nutritive_rel[] = ['ingredients_id'=>$v['ingredients_id'],'cookbook_id'=>$id,'main'=>$v['main']];
+                $ingredients_nutritive_rel[] = ['ingredients_id'=>$ids[$num-1],'cookbook_id'=>$id,'main'=>$attr['main'][$k],'ingredients'=>$v];
             }
             if(!empty($ingredients_nutritive_rel)){
                 DB::table('ingredients_cookbook_rel')->insert($ingredients_nutritive_rel);
@@ -188,12 +191,9 @@ class CookbookRepositoryEloquent extends BaseRepository
     }
 
     public function deleteCookbook($id){
-        $data = DB::table('ingredients_cookbook_rel')->where('cookbook_id', $id)->first();
-        if(!empty($data)){
-            abort(500, '该食谱与食材有关联关系，不允许删除！');
-        }
         $res = $this->delete($id);
         if ($res) {
+            DB::table('ingredients_cookbook_rel')->where('cookbook_id', '=', $id)->delete();
             flash('操作成功!', 'success');
         } else {
             flash('删除失败!', 'error');

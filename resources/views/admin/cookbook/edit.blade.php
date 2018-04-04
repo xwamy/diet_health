@@ -16,12 +16,12 @@
         <!-- begin breadcrumb -->
         <ol class="breadcrumb pull-right">
             <li><a href="javascript:;">主页</a></li>
-            <li><a href="javascript:;">食谱列表</a></li>
+            <li><a href="javascript:;">菜谱列表</a></li>
             <li class="active">编辑</li>
         </ol>
         <!-- end breadcrumb -->
         <!-- begin page-header -->
-        <h1 class="page-header">编辑食谱</h1>
+        <h1 class="page-header">编辑菜谱</h1>
         <!-- end page-header -->
 
         <!-- begin row -->
@@ -49,12 +49,13 @@
                         </div>
                     @endif
                     <div class="panel-body panel-form">
-                        <form class="form-horizontal form-bordered" data-parsley-validate="true" action="{{ url('admin/cookbook/'.$data['id']) }}" method="POST">
+                        <form class="form-horizontal form-bordered" data-parsley-validate="true" action="{{ url('admin/cookbook/'.$data['id']) }}" method="post">
                             {{ csrf_field() }}
+                            {{ method_field('patch') }}
                             <div class="form-group">
-                                <label class="control-label col-md-4 col-sm-4" for="name">食谱名称 * :</label>
+                                <label class="control-label col-md-4 col-sm-4" for="name">菜谱名称 * :</label>
                                 <div class="col-md-6 col-sm-6">
-                                    <input class="form-control" type="text" name="name" placeholder="食谱名称" data-parsley-required="true" data-parsley-required-message="请输入食谱名称" value="{{ $data['name'] }}"/>
+                                    <input class="form-control" type="text" name="name" placeholder="菜谱名称" data-parsley-required="true" data-parsley-required-message="请输入菜谱名称" value="{{ $data['name'] }}"/>
                                 </div>
                             </div>
                             <div class="form-group">
@@ -153,7 +154,7 @@
                             </div>
 
                             <div class="form-group">
-                                <label class="control-label col-md-4 col-sm-4" for="description">营养名称 * :</label>
+                                <label class="control-label col-md-4 col-sm-4" for="description">主要营养 * :</label>
                                 <div class="col-md-6 col-sm-6">
                                     <div class="col-md-12 col-sm-12" id="nutritive_lists">
 
@@ -171,7 +172,18 @@
                                 <div class="col-md-8">
                                     <div id="add_ingredient" class="btn add_ingredient">新增</div>
                                     <table class="table table-striped table-hover" id="reportTable">
-
+                                        @foreach($ingredients as $key=>$value)
+                                            <tr class="add_list" attr_ingredients="{{ $value->ingredients }}">
+                                                <td class="ingredienttype_td_{{ $key }}"></td>
+                                                <td width="20%">
+                                                    <select class="form-control" name="main[]">
+                                                        <option value="1" @if($value->main == '1') selected="selected" @endif>主料</option>
+                                                        <option value="2" @if($value->main == '2') selected="selected" @endif>辅料</option>
+                                                    </select>
+                                                </td>
+                                                <td width="10%"><div class="btn del_ingredient">删除</div></td>
+                                            </tr>
+                                        @endforeach
                                     </table>
                                 </div>
                             </div>
@@ -248,12 +260,15 @@
                     +'<div class="btn del_ingredient">删除</div></td></tr>';
                 $('#reportTable').append(html);
 
-                $("."+html_class).CascadingSelect({data:"0"}); //无限极下拉框
+                $("."+html_class).CascadingSelect(); //无限级下拉框
                 $(".del_ingredient").click(function (){      //删除一行
                     $(this).parents('tr').remove();
                 });
             });
-
+            //循环写入食材分类以及食材Id
+            $.each($("#reportTable tr"), function(key, val) {
+                $("."+$(this).children("td").eq(0).attr("class")).CascadingSelect({data:$(this).attr("attr_ingredients")});
+            });
             //上传图片
             $("#chooseFile").on("click", function() {
                 $("#uploadImg").click();

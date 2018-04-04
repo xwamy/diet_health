@@ -16,12 +16,12 @@
         <!-- begin breadcrumb -->
         <ol class="breadcrumb pull-right">
             <li><a href="javascript:;">主页</a></li>
-            <li><a href="javascript:;">食谱列表</a></li>
+            <li><a href="javascript:;">菜谱列表</a></li>
             <li class="active">新增</li>
         </ol>
         <!-- end breadcrumb -->
         <!-- begin page-header -->
-        <h1 class="page-header">新增食谱</h1>
+        <h1 class="page-header">新增菜谱</h1>
         <!-- end page-header -->
 
         <!-- begin row -->
@@ -52,9 +52,9 @@
                         <form class="form-horizontal form-bordered" data-parsley-validate="true" action="{{ url('admin/cookbook') }}" method="POST">
                             {{ csrf_field() }}
                             <div class="form-group">
-                                <label class="control-label col-md-4 col-sm-4" for="name">食谱名称 * :</label>
+                                <label class="control-label col-md-4 col-sm-4" for="name">菜谱名称 * :</label>
                                 <div class="col-md-6 col-sm-6">
-                                    <input class="form-control" type="text" name="name" placeholder="食谱名称" data-parsley-required="true" data-parsley-required-message="请输入食谱名称" value="{{ old('name') }}"/>
+                                    <input class="form-control" type="text" name="name" placeholder="菜谱名称" data-parsley-required="true" data-parsley-required-message="请输入菜谱名称" value="{{ old('name') }}"/>
                                 </div>
                             </div>
                             <div class="form-group">
@@ -153,7 +153,7 @@
                             </div>
 
                             <div class="form-group">
-                                <label class="control-label col-md-4 col-sm-4" for="description">营养名称 * :</label>
+                                <label class="control-label col-md-4 col-sm-4" for="description">主要营养 * :</label>
                                 <div class="col-md-6 col-sm-6">
                                     <div class="col-md-12 col-sm-12" id="nutritive_lists">
 
